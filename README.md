@@ -16,7 +16,7 @@ The default keeps the command prompt open in its own native window. Opening a we
 
 Use `settings console off` for the original single-window behavior. **Ctrl+L** toggles between a webpage and its prompt; Escape from an empty prompt returns to the page. In separate control mode the control prompt stays visible while the page resumes in its own window.
 
-`settings windows on` gives each tab its own native PowerShell window. `settings windows off` puts tabs together again. Changing window modes moves existing pages without reloading. Private and regular pages remain in separate sessions.
+`settings windows on` gives each tab its own native PowerShell window. `settings windows off` puts tabs together again. Live output appears only in the control window when it is separate; webpage windows use their full height. Changing window modes moves existing pages without reloading. Private and regular pages remain in separate sessions.
 
 ## Commands
 
@@ -97,6 +97,6 @@ Regular cookies, history, preferences, tab URLs, workspaces, bookmarks, download
 
 Remote pages are sandboxed without Node.js or the local command bridge. Permissions use native dialogs; certificate failures are not bypassed. Disguise hides the interface; it does not delete history or saved files.
 
-Version **0.3.0** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, automatic updates, installers, and DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
+Version **0.3.1** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, automatic updates, installers, and DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
 
-Validated locally with **8 unit tests, 79 browser integration checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
+Validated locally with **8 unit tests, 84 browser integration checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.

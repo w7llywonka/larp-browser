@@ -40,7 +40,7 @@ window.setupUI = (() => {
     $('preview-console').style.fontSize = Math.round(s.fontSize * .75) + 'px';
     $('preview-console').style.display = pagePreview && !disguised && !s.consoleWindow ? 'none' : 'block';
     $('preview-web').style.display = pagePreview && !disguised && !s.consoleWindow ? 'block' : 'none';
-    $('preview-live').hidden = !pagePreview || !s.watch || disguised;
+    $('preview-live').hidden = !pagePreview || !s.watch || s.consoleWindow || disguised;
     $('preview-extra').hidden = (!s.windows && !s.consoleWindow) || disguised;
     document.querySelector('#preview-extra div').textContent = s.consoleWindow ? 'Example Domain — webpage in a separate window' : 'PS C:\\Users\\You> _';
     document.querySelector('#preview-extra div').classList.toggle('separate-page-preview', s.consoleWindow && pagePreview);

@@ -178,7 +178,8 @@ module.exports = (Controller, env) => {
     if (this.win.isDestroyed()) return;
     const [width, height] = this.win.getContentSize();
     if (this.consoleVisible) { this.shellView.setBounds({ x: 0, y: 0, width, height }); return; }
-    const dock = prefs().watch && !this.disguised ? Math.min(180, Math.round(height * 0.35)) : 0;
+    const hasControlWindow = this.controlHub !== this && this.controlHub.consoleRole && !this.controlHub.win.isDestroyed();
+    const dock = prefs().watch && !this.disguised && !hasControlWindow ? Math.min(180, Math.round(height * 0.35)) : 0;
     this.shellView.setVisible(!!dock);
     this.shellView.setBounds({ x: 0, y: dock ? height - dock : 0, width, height: dock || height });
     const current = this.current();
