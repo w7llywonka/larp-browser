@@ -8,7 +8,16 @@
     const argument = match[2];
     const prefix = match[1] + ' ';
     let values = [];
-    if (command === 'tab') values = [...(state.tabs || []).map((_, i) => String(i + 1)), 'next', 'prev', 'last', 'new', 'close'];
+    if (command === 'tab') {
+      const removal = argument.match(/^(remove|close)\s+(.*)$/);
+      if (removal) {
+        const parts = removal[2].match(/^(.*\s)?(\S*)$/);
+        const previous = parts[1] || '';
+        const selected = previous.trim().split(/\s+/);
+        return (state.tabs || []).map((_, i) => String(i + 1)).filter(number => !selected.includes(number) && number.startsWith(parts[2])).map(number => prefix + removal[1] + ' ' + previous + number);
+      }
+      values = [...(state.tabs || []).map((_, i) => String(i + 1)), 'next', 'prev', 'last', 'new', 'close', 'remove'];
+    }
     else if (command === 'close') values = (state.tabs || []).map((_, i) => String(i + 1));
     else if (command === 'find') values = ['next', 'prev', 'clear'];
     else if (command === 'history') values = ['clear'];

@@ -37,7 +37,8 @@ test('tab names resolve uniquely and ambiguous names do not switch arbitrarily',
 test('completion understands command arguments and bookmark/history titles', () => {
   const state = { tabs: [{}, {}], bookmarks: [{}], addresses: [{ title: 'Wikipedia', url: 'https://wikipedia.org/' }, { title: 'Duplicate', url: 'https://wikipedia.org/' }], downloads: [{ id: 7, state: 'completed' }, { id: 8, state: 'progressing' }] };
   assert.deepEqual(candidates('reop', state), ['reopen ']);
-  assert.deepEqual(candidates('tab ', state), ['tab 1', 'tab 2', 'tab next', 'tab prev', 'tab last', 'tab new', 'tab close']);
+  assert.deepEqual(candidates('tab ', state), ['tab 1', 'tab 2', 'tab next', 'tab prev', 'tab last', 'tab new', 'tab close', 'tab remove']);
+  assert.deepEqual(candidates('tab remove 1 ', state), ['tab remove 1 2']);
   assert.deepEqual(candidates('open wiki', state), ['open https://wikipedia.org/']);
   assert.deepEqual(candidates('bookmark open ', state), ['bookmark open 1']);
   assert.deepEqual(candidates('download pause ', state), ['download pause 8']);

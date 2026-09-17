@@ -14,6 +14,8 @@ First launch plays a short console boot animation, then opens configuration with
 
 The default keeps the command prompt open in its own native window. Opening a website opens a separate browser window, so you can enter commands without hiding the webpage. The console controls the selected tab. Clicking a page or using `tab 2` selects it. `tabs` lists pages; `new example.com` adds one; `close` closes the selected tab while preserving the control window.
 
+`tab remove 1 2 3` closes several tabs using their numbers before the command starts. `tab close 1 2 3` and `close 1 2 3` also work. All numbers are checked first, and repeated numbers close a tab only once. Closing a page window's last tab closes that window; the separate control prompt remains open and shows no open tabs instead of creating an empty replacement.
+
 Use `settings console off` for the original single-window behavior. **Ctrl+L** toggles between a webpage and its prompt; Escape from an empty prompt returns to the page. In separate control mode the control prompt stays visible while the page resumes in its own window.
 
 `settings windows on` gives each tab its own native PowerShell window. `settings windows off` puts tabs together again. Live output appears only in the control window when it is separate; webpage windows use their full height. Changing window modes moves existing pages without reloading. Private and regular pages remain in separate sessions.
@@ -33,6 +35,7 @@ search mechanical keyboards
 | `help` | Complete command and shortcut reference |
 | `back`, `forward`, `reload`, `stop` | Navigate the selected page |
 | `new [address]`, `tabs`, `tab 2`, `close [number]` | Manage tabs |
+| `tab remove 1 2 3`, `tab close 1 2 3`, `close 1 2 3` | Close several tabs using the original tab numbers |
 | `tab github`, `tab next`, `tab prev` | Select by unique name/URL or cycle |
 | `reopen`, `restore` | Reopen a closed tab or saved regular session |
 | `split example.com`, `split tab 2` | Two real pages side by side |
@@ -97,6 +100,7 @@ Regular cookies, history, preferences, tab URLs, workspaces, bookmarks, download
 
 Remote pages are sandboxed without Node.js or the local command bridge. Permissions use native dialogs; certificate failures are not bypassed. Disguise hides the interface; it does not delete history or saved files.
 
-Version **0.3.1** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, automatic updates, installers, and DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
+Version **0.3.2** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, automatic updates, installers, and DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
 
-Validated locally with **8 unit tests, 84 browser integration checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
+Validated locally with **8 unit tests, 93 browser integration checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
+

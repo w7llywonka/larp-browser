@@ -43,7 +43,11 @@ module.exports = (Controller, env) => {
     original.navigate.call(this, url, tab);
   };
   p.closeTab = function (index) {
-    if (this.consoleRole) { const tab = this.current(); if (tab && tab.owner !== this) return tab.owner.closeTab(tab.owner.tabs.indexOf(tab)); }
+    if (this.consoleRole) {
+      const tab = this.current();
+      if (tab && tab.owner !== this) return tab.owner.closeTab(tab.owner.tabs.indexOf(tab));
+      return this.output('No open tabs.');
+    }
     return original.closeTab.call(this, index);
   };
   p.newSibling = function () {
@@ -226,7 +230,7 @@ module.exports = (Controller, env) => {
   p.reopen = async function () {
     const snapshot = this.closedTabs.pop();
     if (!snapshot) return this.output('No closed tabs to reopen in this window.');
-    const tab = this.tabs.length === 1 && !this.current().url ? this.current() : this.addTab();
+    const tab = !this.consoleRole && this.tabs.length === 1 && !this.current().url ? this.current() : this.addTab();
     const owner = tab.owner;
     tab.url = snapshot.url; tab.title = snapshot.title;
     const wc = tab.view.webContents;
@@ -313,12 +317,28 @@ module.exports = (Controller, env) => {
       }
       if (name === 'tabs' || (name === 'tab' && !arg)) {
         const entries = this.allTabs();
+        if (!entries.length) { this.output('No open tabs.'); return; }
         this.output(entries.map((e, i) => `${e.tab === this.current() ? '*' : ' '} ${i + 1}  ${e.tab.title}${prefs().windows ? ' [window]' : ''}${e.tab.loading ? ' [loading]' : ''}${e.tab.error ? ' [failed]' : ''}\n     ${e.tab.url || '(empty)'}`).join('\n')); return;
       }
-      if (name === 'tab' && arg && !/^(new|close)(\s|$)/i.test(arg)) { this.chooseTab(arg); return; }
-      if ((name === 'close' && arg) || (name === 'tab' && /^close\s+/i.test(arg))) {
-        const number = name === 'close' ? arg : arg.slice(6); const entries = this.allTabs();
-        const entry = entries[tabIndex(number, entries.map(e => e.tab), 0)]; await entry.controller.closeTab(entry.index); return;
+      if (name === 'tab' && arg && !/^(new|close|remove)(\s|$)/i.test(arg)) { this.chooseTab(arg); return; }
+      if ((name === 'close' && arg) || (name === 'tab' && /^(close|remove)(\s|$)/i.test(arg))) {
+        const selector = name === 'close' ? arg : splitCommand(arg).argument;
+        if (!selector) { await this.closeTab(); return; }
+        const entries = this.allTabs();
+        const numbers = selector.split(/\s+/);
+        // Resolve the entire list before closing anything. Later numbers must
+        // continue to refer to the original list, even as indexes shift.
+        const indexes = numbers.length === 1 ? [tabIndex(selector, entries.map(e => e.tab), 0)] : numbers.map(number => {
+          if (!/^\d+$/.test(number)) throw new Error('Use tab remove <numbers>, e.g. tab remove 1 2 3.');
+          return tabIndex(number, entries.map(e => e.tab), 0);
+        });
+        const targets = [...new Set(indexes)].map(index => entries[index]);
+        for (const entry of targets) {
+          const owner = entry.tab.owner;
+          const index = owner.tabs.indexOf(entry.tab);
+          if (index >= 0 && !owner.win.isDestroyed()) await owner.closeTab(index);
+        }
+        return;
       }
       if (name === 'split') {
         if (this.consoleRole && this.current()?.owner !== this) return await this.current().owner.execute(line);

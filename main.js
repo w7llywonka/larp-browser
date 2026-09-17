@@ -13,6 +13,7 @@ if (testing || smokeTesting) process.on('uncaughtException', error => { console.
 app.setName('PowerShell Browser');
 app.setPath('userData', testing ? path.join(__dirname, 'test-profile-' + process.pid) : smokeTesting ? (process.env.PSB_SMOKE_PROFILE || path.join(os.tmpdir(), 'PowerShell-Browser-Smoke-' + process.pid)) : path.join(app.getPath('appData'), 'PowerShell Browser'));
 const controllers = new Map();
+const retiredShells = new WeakSet();
 const sessions = new WeakSet();
 let store;
 let storeFile;
@@ -40,6 +41,7 @@ const HELP = `Browser commands (these are browser commands, not actual PowerShel
   tab <title or domain>  Switch by name; tab next / prev also work
   new [address]          Open a new tab (also: tab new)
   close [number]         Close a tab (also: tab close)
+  tab remove 1 2 3       Close multiple tabs using their original numbers
   reopen                 Reopen the last closed tab with its history
   restore                Reopen your saved regular tabs
   history [words]        List or filter browsing history
@@ -208,6 +210,7 @@ class BrowserController {
     this.shellView.webContents.on('before-input-event', (event, input) => this.shortcut(event, input));
     this.win.on('resize', () => this.resize());
     this.win.on('closed', () => {
+      retiredShells.add(this.shellView.webContents);
       this.persistTabs();
       writeStore();
       controllers.delete(windowId);
@@ -338,6 +341,14 @@ class BrowserController {
       this.tabs.splice(index, 1);
       if (index < this.active) this.active--;
       this.active = Math.min(this.active, this.tabs.length - 1);
+      const hub = this.controlHub;
+      if (!this.tabs.length && hub !== this && hub.consoleRole && !hub.win.isDestroyed()) {
+        if (hub.selectedTab === tab) hub.selectedTab = null;
+        this.persistTabs();
+        this.win.close();
+        hub.updateTitle(); hub.notify();
+        return;
+      }
       if (!this.tabs.length) this.addTab(); else this.showPage();
       this.persistTabs();
     });
@@ -592,7 +603,7 @@ function fromIPC(event) {
   if (!controller || event.sender !== controller.shellView.webContents || event.senderFrame !== event.sender.mainFrame) throw new Error('Untrusted browser command.');
   return controller;
 }
-ipcMain.handle('browser:state', event => fromIPC(event).state());
+ipcMain.handle('browser:state', event => retiredShells.has(event.sender) ? null : fromIPC(event).state());
 ipcMain.handle('browser:command', (event, line) => {
   if (typeof line !== 'string' || line.length > 8192) throw new Error('Invalid command.');
   return fromIPC(event).execute(line);

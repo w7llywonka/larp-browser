@@ -35,6 +35,7 @@ function print(text, kind = '') {
   scrollBottom();
 }
 function applyState(value) {
+  if (!value) return;
   state = value;
   prompt.textContent = value.prompt;
   document.documentElement.style.setProperty('--font-size', value.fontSize + 'px');
@@ -141,4 +142,4 @@ consoleElement.addEventListener('click', event => {
   if (!window.getSelection().toString() && event.target !== input) input.focus();
 });
 window.addEventListener('resize', updateCursor);
-window.browser.state().then(applyState).then(() => { input.focus(); updateCursor(); });
+window.browser.state().then(applyState).then(() => { input.focus(); updateCursor(); }).catch(() => {});
