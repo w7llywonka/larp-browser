@@ -1,0 +1,20 @@
+{
+  "name": "powershell-browser",
+  "productName": "PowerShell Browser",
+  "version": "0.3.0",
+  "description": "A standalone browser inside a faithful classic PowerShell console interface.",
+  "main": "main.js",
+  "private": true,
+  "author": "",
+  "license": "MIT",
+  "scripts": {
+    "start": "electron .",
+    "test": "node --test test/*.test.js",
+    "verify": "electron . --self-test",
+    "package": "node package.mjs"
+  },
+  "devDependencies": {
+    "electron": "44.4.1",
+    "@electron/packager": "20.3.0"
+  }
+}

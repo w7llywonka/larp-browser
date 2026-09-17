@@ -1,0 +1,60 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self'; img-src 'self'; connect-src 'none'">
+  <title>Windows PowerShell</title>
+  <link rel="stylesheet" href="console.css">
+</head>
+<body>
+  <section id="onboarding" hidden aria-label="First launch setup">
+    <div id="boot" role="status" aria-live="polite"><pre class="boot-mark">&gt;_</pre><p>POWERSHELL BROWSER</p><div id="boot-log"></div><div class="boot-track"><span></span></div></div>
+    <div id="setup-panel" hidden>
+      <header class="setup-heading"><div><span class="eyebrow">INITIAL CONFIGURATION / 01</span><h1>How far into the<br>console do you want to go?</h1><p>A real browser. A familiar disguise.<br>Choose your defaults, then make yourself at home.</p></div><span class="setup-badge">&gt;_</span></header>
+      <div class="setup-grid">
+        <form id="setup-form">
+          <fieldset><legend>01 / Choose your realism</legend><div class="preset-options">
+            <label><input type="radio" name="realism" value="strict"><span>Strict<span class="option-detail">Classic title. Quiet console. No browser alerts.</span></span></label>
+            <label><input type="radio" name="realism" value="balanced" checked><span>Balanced<span class="option-detail">PowerShell appearance with useful download alerts.</span></span></label>
+            <label><input type="radio" name="realism" value="browser"><span>Browser<span class="option-detail">Page titles and a live console below your pages.</span></span></label>
+          </div></fieldset>
+          <fieldset><legend>02 / Windows &amp; console</legend>
+            <label class="setting-row"><span>Keep a separate command window open<small>Control webpages without hiding them.</small></span><input id="pref-consoleWindow" type="checkbox" checked></label>
+            <label class="setting-row"><span>Give each tab its own PowerShell window<small>Turn off to use tabs and split browsing.</small></span><input id="pref-windows" type="checkbox"></label>
+            <label class="setting-row"><span>Show page names in the title bar</span><input id="pref-title" type="checkbox"></label>
+            <label class="setting-row"><span>Show the classic startup banner</span><input id="pref-banner" type="checkbox" checked></label>
+            <label class="setting-row"><span>Live console below webpages<small>Loading, downloads, and find results.</small></span><input id="pref-watch" type="checkbox"></label>
+            <label class="setting-row"><span>Notify me when downloads finish<small>Temporary title and taskbar flash.</small></span><input id="pref-notifications" type="checkbox" checked></label>
+            <label class="setting-row"><span>Blink the console cursor</span><input id="pref-blink" type="checkbox" checked></label>
+          </fieldset>
+          <fieldset><legend>03 / Your defaults</legend>
+            <label class="setting-row"><span>Console font size <output id="font-value">16 px</output></span><input id="pref-font" type="range" min="12" max="32" value="16" aria-label="Console font size"></label>
+            <label class="setting-row"><span>Instant disguise shortcut</span><select id="pref-panic"><option value="f8">F8</option><option value="f12">F12</option><option value="ctrlshiftspace">Ctrl + Shift + Space</option></select></label>
+            <label class="setting-row"><span>Search engine</span><select id="pref-search"><option value="duckduckgo">DuckDuckGo</option><option value="google">Google</option><option value="bing">Bing</option></select></label>
+          </fieldset>
+          <p id="setup-error" role="alert"></p><button type="submit" id="start-browsing">Start browsing <span>→</span></button><p class="setup-footnote">Everything here can be changed later. Type <strong>settings</strong> at the prompt, or <strong>setup</strong> to return to this preview.</p>
+        </form>
+        <aside class="preview-column">
+          <span class="eyebrow">LIVE PREVIEW / YOUR WINDOW</span>
+          <div class="preview-window"><div class="preview-title"><img src="assets/powershell.png" alt=""><span id="preview-title">Windows PowerShell</span><span>─ □ ×</span></div><div id="preview-console"><div id="preview-banner">Windows PowerShell<br>Copyright (C) Microsoft Corporation. All rights reserved.<br><br></div><div>PS C:\Users\You&gt; <span id="preview-command">open example.com</span><i class="preview-cursor">_</i></div><div id="preview-hint">Your browser starts at a real command prompt.</div></div><div id="preview-web"><div class="preview-domain">Example Domain</div><p>Websites render normally.<br>Your controls live in the console.</p></div><div id="preview-live" hidden><div>[12:00:01] ready    Example Domain</div><div>PS C:\Users\You&gt; _</div></div></div>
+          <div id="preview-extra" hidden><span>Windows PowerShell</span><div>PS C:\Users\You&gt; _</div></div>
+          <div class="preview-actions"><button type="button" id="preview-toggle">Preview webpage</button><button type="button" id="preview-disguise">Try disguise key</button></div>
+          <div class="quick-start"><span class="eyebrow">THE THREE THINGS TO REMEMBER</span><div><kbd>Enter</kbd><p>Type a website or a search<br><code>example.com</code> or <code>search cats</code></p></div><div><kbd>Ctrl + L</kbd><p>Toggle between your page and the prompt.<br>Press it again to get back to your tab.</p></div><div><kbd id="panic-key">F8</kbd><p>Hide pages behind a clean PowerShell prompt.<br>Your tabs stay open.</p></div><p class="preview-tip">Try <code>help</code>, <code>split example.com</code>, <code>workspace save work</code>, <code>snapshot</code>, or <code>note</code>.</p></div>
+        </aside>
+      </div>
+    </div>
+  </section>
+  <section id="scratchpad" hidden aria-label="Scratchpad"><div id="note-heading">Scratchpad — autosaves | Ctrl+S save | Escape return</div><textarea id="note-text" spellcheck="false" aria-label="Scratchpad text"></textarea><div id="note-status" role="status">Saved</div></section>
+  <main id="console" aria-label="Browser command console">
+    <div id="transcript" role="log" aria-live="polite" aria-relevant="additions"><div class="line startup-line">Windows PowerShell</div><div class="line startup-line">Copyright (C) Microsoft Corporation. All rights reserved.</div><div class="line startup-line"> </div></div>
+    <form id="command-form" autocomplete="off">
+      <label id="prompt" for="command">PS C:\Users\User&gt; </label>
+      <div id="input-wrap"><input id="command" type="text" aria-label="Website address or browser command" spellcheck="false" autocapitalize="off" autofocus><i id="cursor" aria-hidden="true"></i></div>
+    </form>
+  </main>
+  <script src="completion.js"></script>
+  <script src="onboarding.js"></script>
+  <script src="console.js"></script>
+</body>
+</html>

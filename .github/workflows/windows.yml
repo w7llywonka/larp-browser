@@ -1,0 +1,34 @@
+name: Windows build
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '24'
+          cache: npm
+      - run: npm ci
+      - run: npm test
+      - run: npm run verify
+      - run: npm run package
+      - name: Check packaged startup
+        shell: pwsh
+        run: |
+          $appProcess = Start-Process -FilePath '.\dist\PowerShell Browser-win32-x64\PowerShell Browser.exe' -ArgumentList '--smoke-test' -WindowStyle Hidden -Wait -PassThru
+          if ($appProcess.ExitCode -ne 0) { throw 'Packaged startup failed' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: PowerShell-Browser-Windows
+          path: dist/PowerShell Browser-win32-x64/
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: browser-verification
+          path: verification/
