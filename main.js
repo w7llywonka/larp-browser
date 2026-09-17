@@ -19,6 +19,7 @@ let store;
 let storeFile;
 let saveTimer;
 let downloadCounter = 0;
+let updates;
 const liveDownloads = new Map();
 const ownsInstance = testing || smokeTesting || app.requestSingleInstanceLock();
 if (!ownsInstance) app.quit();
@@ -61,6 +62,11 @@ const HELP = `Browser commands (these are browser commands, not actual PowerShel
   zoom <percent>         Set page zoom (25 through 500)
   font <pixels>          Set console font size (12 through 32)
   settings               Show preferences
+  update                 Check for a newer installed edition
+  update status          Show update progress and automatic update setting
+  update download        Download an available update manually
+  update install         Apply a downloaded update and restart
+  settings updates off   Disable automatic downloads and installation
   settings search <name> Choose duckduckgo, google, or bing
   save                   Save the current page as HTML
   print                  Print the current page
@@ -596,7 +602,7 @@ class BrowserController {
   }
 }
 
-require('./features')(BrowserController, { app, controllers, getStore: () => store, saveStore, writeStore, testing });
+require('./features')(BrowserController, { app, controllers, getStore: () => store, saveStore, writeStore, testing, getUpdates: () => updates });
 
 function fromIPC(event) {
   const controller = controllerFor(event.sender);
@@ -618,6 +624,10 @@ app.whenReady().then(async () => {
   if (!ownsInstance) return;
   Menu.setApplicationMenu(null);
   loadStore();
+  updates = require('./updater').createUpdateService({ app, disabled: testing || smokeTesting, enabled: () => store.preferences.updates, announce: message => {
+    const c = [...controllers.values()].find(c => !c.private && c.consoleRole) || [...controllers.values()].find(c => !c.private);
+    if (c) c.output(message);
+  } });
   if (testing) {
     try { await require('./test/integration')( { BrowserController, store, writeStore, app, storeFile, controllers } ); app.exit(0); }
     catch (error) { console.error(error); app.exit(1); }
@@ -640,5 +650,6 @@ app.whenReady().then(async () => {
     const browser = new BrowserController();
     const requested = process.argv.find(value => /^https?:\/\//i.test(value));
     if (requested) { await browser.ready; browser.navigate(destination(requested)); }
+    updates.start();
   }
 });

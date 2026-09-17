@@ -2,3 +2,7 @@ node_modules/
 test-profile-*/
 verification/
 dist/
+release/
+.vercel/
+site/.vercel/
+.env*

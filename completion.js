@@ -1,6 +1,6 @@
 'use strict';
 (function (root) {
-  const commands = ['open', 'search', 'back', 'forward', 'reload', 'stop', 'tabs', 'tab', 'new', 'close', 'reopen', 'restore', 'history', 'bookmark', 'bookmarks', 'downloads', 'download', 'private', 'window', 'find', 'zoom', 'settings', 'font', 'home', 'clear', 'cls', 'help', 'site', 'status', 'save', 'print', 'mute', 'about', 'exit', 'setup', 'split', 'workspace', 'workspaces', 'watch', 'snapshot', 'note', 'scratchpad', 'panic', 'disguise'];
+  const commands = ['open', 'search', 'back', 'forward', 'reload', 'stop', 'tabs', 'tab', 'new', 'close', 'reopen', 'restore', 'history', 'bookmark', 'bookmarks', 'downloads', 'download', 'private', 'window', 'find', 'zoom', 'settings', 'font', 'home', 'clear', 'cls', 'help', 'site', 'status', 'save', 'print', 'mute', 'about', 'exit', 'setup', 'split', 'workspace', 'workspaces', 'watch', 'snapshot', 'note', 'scratchpad', 'panic', 'disguise', 'update', 'updates'];
   function candidates(line, state = {}) {
     const match = line.match(/^(\S+)\s+([\s\S]*)$/);
     if (!match) return commands.filter(c => c.startsWith(line.toLowerCase())).map(c => c + ' ');
@@ -21,8 +21,9 @@
     else if (command === 'close') values = (state.tabs || []).map((_, i) => String(i + 1));
     else if (command === 'find') values = ['next', 'prev', 'clear'];
     else if (command === 'history') values = ['clear'];
-    else if (command === 'settings') values = ['console on', 'console off', 'windows on', 'windows off', 'realism strict', 'realism balanced', 'realism browser', 'title classic', 'title page', 'watch on', 'watch off', 'notifications on', 'notifications off', 'search duckduckgo', 'search google', 'search bing'];
+    else if (command === 'settings') values = ['console on', 'console off', 'windows on', 'windows off', 'realism strict', 'realism balanced', 'realism browser', 'title classic', 'title page', 'watch on', 'watch off', 'notifications on', 'notifications off', 'search duckduckgo', 'search google', 'search bing', 'updates on', 'updates off'];
     else if (command === 'split') values = ['off', 'swap', 'focus left', 'focus right', 'ratio 50', ...(state.tabs || []).map((_, i) => 'tab ' + (i + 1))];
+    else if (command === 'update' || command === 'updates') values = ['check', 'status', 'download', 'install'];
     else if (command === 'watch') values = ['on', 'off'];
     else if (command === 'workspace') values = ['save ', 'open ', 'remove ', 'list'];
     else if (command === 'bookmark') values = [...(state.bookmarks || []).flatMap((_, i) => ['open ' + (i + 1), 'remove ' + (i + 1)])];
