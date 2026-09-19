@@ -2,7 +2,9 @@
 const { test } = require('node:test');
 const assert = require('node:assert/strict');
 const vm = require('node:vm');
-const { shouldBlockYouTubeRequest, configureYouTubeAdBlocking, injection } = require('../youtube-adblock');
+const {
+  shouldBlockYouTubeRequest, configureYouTubeAdBlocking, injection, clickVisibleSkipButton
+} = require('../youtube-adblock');
 
 test('request filter blocks YouTube ad routes without blocking video and page requests', () => {
   assert.equal(shouldBlockYouTubeRequest({ url: 'https://www.youtube.com/api/stats/ads?ver=2' }), true);
@@ -26,22 +28,17 @@ test('session filter reads the current setting for every request', () => {
   assert.deepEqual(result, { cancel: false });
 });
 
-test('page helper finishes each ad once and restores normal playback afterward', () => {
+test('page helper accelerates ads without synthetic clicks or seeking and restores playback', () => {
   let tick;
   let removed = false;
   let showing = true;
-  let source = 'ad-one';
-  let duration = 10;
   let currentTime = 0;
   let seeks = 0;
-  let clicks = 0;
   let plays = 0;
   const video = {
-    get duration() { return duration; },
-    get currentSrc() { return source; },
     get currentTime() { return currentTime; },
     set currentTime(value) { currentTime = value; seeks++; },
-    muted: false, playbackRate: 1, isConnected: true,
+    muted: false, playbackRate: 1, paused: true, isConnected: true,
     play() { plays++; }
   };
   const style = { id: '', textContent: '', remove() { removed = true; } };
@@ -49,29 +46,45 @@ test('page helper finishes each ad once and restores normal playback afterward',
     head: { appendChild() {} },
     documentElement: { appendChild() {} },
     createElement() { return style; },
-    querySelectorAll() { return [{ click() { clicks++; } }]; },
+    querySelectorAll() { return []; },
     querySelector(selector) {
       if (selector !== '#movie_player') return null;
       return { classList: { contains(value) { return showing && value === 'ad-showing'; } }, querySelector() { return video; } };
     }
   };
-  const context = { window: {}, location: { hostname: 'www.youtube.com' }, document, setInterval(fn) { tick = fn; return 7; }, clearInterval() {} };
+  const context = {
+    window: {}, location: { hostname: 'www.youtube.com' }, document,
+    getComputedStyle() { return { display: 'block', visibility: 'visible', opacity: '1' }; },
+    setInterval(fn) { tick = fn; return 7; }, clearInterval() {}
+  };
   assert.equal(vm.runInNewContext(injection(true), context), true);
   tick(); tick();
-  assert.equal(seeks, 1);
-  assert.ok(Math.abs(currentTime - 9.99) < 0.001);
+  assert.equal(seeks, 0);
+  assert.equal(currentTime, 0);
   assert.equal(video.muted, true);
   assert.equal(video.playbackRate, 16);
-  assert.equal(plays, 1);
-  assert.ok(clicks >= 3);
-
-  source = 'ad-two'; duration = 5; tick();
-  assert.equal(seeks, 2);
-  assert.ok(Math.abs(currentTime - 4.99) < 0.001);
+  assert.ok(plays >= 1);
 
   showing = false; tick();
   assert.equal(video.muted, false);
   assert.equal(video.playbackRate, 1);
   assert.equal(vm.runInNewContext(injection(false), context), false);
   assert.equal(removed, true);
+});
+
+test('native skip helper sends an Electron mouse click to a visible button', async () => {
+  const events = [];
+  const webContents = {
+    isDestroyed() { return false; },
+    getURL() { return 'https://www.youtube.com/watch?v=abc'; },
+    async executeJavaScript(source) {
+      assert.match(source, /elementFromPoint/);
+      return { x: 640, y: 360 };
+    },
+    sendInputEvent(event) { events.push(event); }
+  };
+  assert.equal(await clickVisibleSkipButton(webContents), true);
+  assert.deepEqual(events.map(event => event.type), ['mouseMove', 'mouseDown', 'mouseUp']);
+  assert.equal(events[1].button, 'left');
+  assert.equal(events[2].x, 640);
 });

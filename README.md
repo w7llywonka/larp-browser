@@ -4,7 +4,7 @@ A standalone Windows browser that copies classic Windows PowerShell: native Wind
 
 ## Download and first launch
 
-Download **Larp-Browser-Setup-0.5.3.exe** from [Releases](https://github.com/w7llywonka/larp-browser/releases). Run the setup EXE to install the browser and its built-in automatic update checker. No Node.js installation is needed. A portable ZIP is also available, but it does not install updates automatically. Close older portable versions before installing; your existing local profile is preserved.
+Download **Larp-Browser-Setup-0.5.4.exe** from [Releases](https://github.com/w7llywonka/larp-browser/releases). Run the setup EXE to install the browser and its built-in automatic update checker. No Node.js installation is needed. A portable ZIP is also available, but it does not install updates automatically. Close older portable versions before installing; your existing local profile is preserved.
 
 First launch plays a short console boot animation, then opens configuration with a live preview. Choose Strict, Balanced, or Browser realism, then customize separate windows, titles, startup text, live output, download alerts, blinking, font size, disguise shortcut, search engine, automatic updates, and YouTube ad blocking. Type `setup` to revisit the preview or `settings` for a numbered console menu.
 
@@ -103,9 +103,9 @@ Regular cookies, history, preferences, tab URLs, workspaces, bookmarks, download
 
 Remote pages are sandboxed without Node.js or the local command bridge. Permissions use native dialogs; certificate failures are not bypassed. Disguise hides the interface; it does not delete history or saved files.
 
-Version **0.5.3** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
+Version **0.5.4** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
 
-Validated locally with **20 unit tests, 96 browser integration checks, and 5 actual NSIS update-feed checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
+Validated locally with **21 unit tests, 96 browser integration checks, and 5 actual NSIS update-feed checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, YouTube ad skipping, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
 
 
 ## Automatic updates
