@@ -300,7 +300,7 @@ module.exports = (Controller, env) => {
       }
       if (name === 'update' || name === 'updates') {
         const service = getUpdates();
-        if (arg === 'install') { writeStore(); service.install(); }
+        if (arg === 'install') { this.output('Preparing the newest update for installation...'); writeStore(); await service.install(); }
         else if (arg === 'download') { await service.download(); this.output(service.text()); }
         else if (!arg || arg === 'check') { await service.check(true); this.output(service.text()); }
         else if (arg === 'status') this.output(service.text());

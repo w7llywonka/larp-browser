@@ -5,7 +5,7 @@ const path = require('node:path');
 class UpdateService {
   constructor({ updater, app, enabled, supported, announce = () => {}, log = () => {} }) {
     this.updater = updater; this.app = app; this.enabled = enabled; this.supported = supported;
-    this.announce = announce; this.log = log; this.busy = null;
+    this.announce = announce; this.log = log; this.busy = null; this.downloadPromise = null;
     this.state = { status: supported ? 'idle' : 'unsupported', version: app.getVersion(), nextVersion: null, progress: 0 };
     updater.allowPrerelease = false; updater.allowDowngrade = false;
     updater.autoRunAppAfterInstall = false; updater.disableWebInstaller = true;
@@ -32,15 +32,24 @@ class UpdateService {
     this.app.once('before-quit', () => this.stop());
   }
   stop() { clearTimeout(this.first); clearInterval(this.interval); }
+  trackDownload(promise) {
+    const tracked = Promise.resolve(promise).catch(error => {
+      this.set({ status: 'error', error: error.message });
+      throw error;
+    }).finally(() => {
+      if (this.downloadPromise === tracked) this.downloadPromise = null;
+    });
+    this.downloadPromise = tracked;
+    tracked.catch(() => {});
+    return tracked;
+  }
   async check(manual = true) {
     if (!this.supported || (!manual && !this.enabled())) return this.state;
     if (this.state.status === 'ready' || this.state.status === 'downloading') return this.state;
     if (this.busy) return this.busy;
     this.sync();
     this.busy = Promise.resolve().then(() => this.updater.checkForUpdates()).then(result => {
-      // Automatic downloads outlive the check. Handle their rejection too,
-      // so a failed download cannot become an unhandled main-process error.
-      result?.downloadPromise?.catch(error => this.set({ status: 'error', error: error.message }));
+      if (result?.downloadPromise) this.trackDownload(result.downloadPromise);
     }).catch(error => {
       this.set({ status: 'error', error: error.message });
     }).then(() => this.state).finally(() => { this.busy = null; });
@@ -48,24 +57,40 @@ class UpdateService {
   }
   async download() {
     if (!this.supported) throw new Error('Install the browser using the setup EXE to enable updates.');
-    if (this.state.status === 'ready' || this.state.status === 'downloading') return;
-    await this.check(true);
-    if (this.state.status !== 'available') return;
-    try { await this.updater.downloadUpdate(); }
-    catch (error) { this.set({ status: 'error', error: error.message }); throw new Error('Update download failed. Please try again later.'); }
+    if (this.state.status === 'ready') return this.state;
+    if (this.busy) await this.busy;
+    if (!this.downloadPromise && this.state.status !== 'downloading') await this.check(true);
+    if (this.state.status === 'ready') return this.state;
+    let pending = this.downloadPromise;
+    if (!pending && this.state.status === 'available') pending = this.trackDownload(this.updater.downloadUpdate());
+    if (pending) {
+      try { await pending; }
+      catch { throw new Error('Update download failed. Please try again later.'); }
+    }
+    if (this.state.status === 'ready') return this.state;
+    if (this.state.status === 'current') return this.state;
+    if (this.state.status === 'error') throw new Error('Update download failed: ' + (this.state.error || 'unknown error'));
+    throw new Error('The update is still downloading. Use update status to see its progress, then run update install again.');
   }
-  install() {
-    if (this.state.status !== 'ready') throw new Error('No downloaded update. Use update or update download first.');
+  async install() {
+    if (!this.supported) throw new Error('Install the browser using the setup EXE to enable updates.');
+    if (this.state.status !== 'ready') await this.download();
+    if (this.state.status === 'current') throw new Error('PowerShell Browser ' + this.state.version + ' is already the latest version.');
+    if (this.state.status !== 'ready') throw new Error('No downloaded update is ready to install.');
+    this.set({ status: 'installing', progress: 100 });
+    this.log('Manual update install requested; restarting into installer.');
     this.updater.quitAndInstall(true, true);
+    return this.state;
   }
   text() {
     if (!this.supported) return 'Automatic updates require the installed Windows edition. Download the setup EXE from https://github.com/w7llywonka/larp-browser/releases/latest. Your current profile will be preserved.';
     const messages = {
-      idle: 'Waiting for the next update check.', checking: 'Checking for updates…', current: 'You have the latest version.',
+      idle: 'Waiting for the next update check.', checking: 'Checking for updates...', current: 'You have the latest version.',
       available: 'Update ' + this.state.nextVersion + ' is available. Use update download to download it.',
       downloading: 'Downloading ' + this.state.nextVersion + ': ' + this.state.progress + '%',
       ready: 'Update ' + this.state.nextVersion + ' is ready. It will install on exit when automatic updates are on. Use update install to restart now.',
-      error: 'Update check failed. The browser still works; it will try again later.'
+      installing: 'Installing update ' + this.state.nextVersion + ' and restarting...',
+      error: 'Update failed: ' + (this.state.error || 'unknown error') + '. The browser still works; use update to try again.'
     };
     return 'PowerShell Browser ' + this.state.version + ' | Automatic updates: ' + (this.enabled() ? 'on' : 'off') + '\n' + messages[this.state.status];
   }

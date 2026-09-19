@@ -4,7 +4,7 @@ A standalone Windows browser that copies classic Windows PowerShell: native Wind
 
 ## Download and first launch
 
-Download **Larp-Browser-Setup-0.5.0.exe** from [Releases](https://github.com/w7llywonka/larp-browser/releases). Run the setup EXE to install the browser and its built-in automatic update checker. No Node.js installation is needed. A portable ZIP is also available, but it does not install updates automatically. Close older portable versions before installing; your existing local profile is preserved.
+Download **Larp-Browser-Setup-0.5.1.exe** from [Releases](https://github.com/w7llywonka/larp-browser/releases). Run the setup EXE to install the browser and its built-in automatic update checker. No Node.js installation is needed. A portable ZIP is also available, but it does not install updates automatically. Close older portable versions before installing; your existing local profile is preserved.
 
 First launch plays a short console boot animation, then opens configuration with a live preview. Choose Strict, Balanced, or Browser realism, then customize separate windows, titles, startup text, live output, download alerts, blinking, font size, disguise shortcut, search engine, automatic updates, and YouTube ad blocking. Type `setup` to revisit the preview or `settings` for a numbered console menu.
 
@@ -103,16 +103,16 @@ Regular cookies, history, preferences, tab URLs, workspaces, bookmarks, download
 
 Remote pages are sandboxed without Node.js or the local command bridge. Permissions use native dialogs; certificate failures are not bypassed. Disguise hides the interface; it does not delete history or saved files.
 
-Version **0.5.0** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
+Version **0.5.1** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
 
-Validated locally with **18 unit tests, 95 browser integration checks, and 4 actual NSIS update-feed checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
+Validated locally with **20 unit tests, 95 browser integration checks, and 5 actual NSIS update-feed checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
 
 
 ## Automatic updates
 
 The installed Windows edition checks GitHub Releases 15 seconds after launch and every six hours. It downloads newer stable versions, verifies their checksums, and installs them on a normal browser exit. Existing settings, cookies, bookmarks, history, workspaces, and notes remain in the same local profile. Network failures do not prevent browsing and are retried later.
 
-Use `update` to check now, `update status` to see progress, `update download` for a manual download, or `update install` to apply a downloaded update and restart. `settings updates off` disables automatic checks, downloads, and installation; `settings updates on` re-enables them. First-launch setup also exposes this setting. Update messages respect the disguise screen. Portable/development builds give migration instructions rather than trying to replace an unsupported executable.
+Use `update` to check now, `update status` to see progress, or `update download` for a manual download. `update install` now performs the full check, download (or cached-installer reuse), installation, and restart sequence in one command. `settings updates off` disables automatic checks, downloads, and installation; `settings updates on` re-enables them. First-launch setup also exposes this setting. Update messages respect the disguise screen. Portable/development builds give migration instructions rather than trying to replace an unsupported executable.
 
 `npm run installer` creates a per-user NSIS setup EXE, blockmap, and `latest.yml` in `release/`. Publish these three together to a stable GitHub release. Windows CI builds and checks them; pushing a `vX.Y.Z` tag publishes missing installer/feed assets automatically. Bump the package version before tagging. Never mix an installer and manifest from different builds. The native update-feed test uses the real installer and updater, checks valid and corrupt downloads, and intercepts the installation handoff without installing software.
 

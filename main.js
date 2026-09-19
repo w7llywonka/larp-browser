@@ -66,7 +66,7 @@ const HELP = `Browser commands (these are browser commands, not actual PowerShel
   update                 Check for a newer installed edition
   update status          Show update progress and automatic update setting
   update download        Download an available update manually
-  update install         Apply a downloaded update and restart
+  update install         Check, download, install, and restart
   settings updates off   Disable automatic downloads and installation
   adblock on / off        Control YouTube ad blocking
   settings youtubeads off Disable YouTube ad blocking

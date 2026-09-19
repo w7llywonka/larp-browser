@@ -49,6 +49,19 @@ const { UpdateService } = require('../updater');
     good.updater.doInstall = options => { assert.equal(crypto.createHash('sha512').update(fs.readFileSync(good.updater.installerPath)).digest('base64'), hash); assert.equal(options.isSilent, true); handedOff = true; return true; };
     good.updater.addQuitHandler(); good.quitHandlers.forEach(handler => handler(0));
     assert.ok(handedOff); console.log('PASS automatic exit hands the verified installer to NSIS installation');
+    const manual = instance('manual');
+    let manualHandoff = false;
+    manual.updater.doInstall = options => {
+      assert.equal(crypto.createHash('sha512').update(fs.readFileSync(manual.updater.installerPath)).digest('base64'), hash);
+      assert.equal(options.isSilent, true); assert.equal(options.isForceRunAfter, true);
+      manualHandoff = true; return true;
+    };
+    manual.updater.quitAndInstall = (silent, forceRun) => {
+      assert.equal(silent, true); assert.equal(forceRun, true);
+      assert.equal(manual.updater.install(silent, forceRun), true);
+    };
+    await manual.service.install();
+    assert.ok(manualHandoff); console.log('PASS update install checks, downloads, and requests a forced restart');
     corrupt = true;
     const bad = instance('corrupt'); bad.updater.logger.error = () => {}; await bad.service.check(); await assert.rejects(() => bad.service.download());
     assert.equal(bad.service.state.status, 'error'); console.log('PASS corrupted installer is rejected before installation');
