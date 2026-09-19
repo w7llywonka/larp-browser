@@ -26,27 +26,52 @@ test('session filter reads the current setting for every request', () => {
   assert.deepEqual(result, { cancel: false });
 });
 
-test('page helper skips an in-player ad and cleans up immediately when disabled', () => {
+test('page helper finishes each ad once and restores normal playback afterward', () => {
   let tick;
   let removed = false;
-  const video = { duration: 10, currentTime: 0, muted: false, playbackRate: 1, isConnected: true };
+  let showing = true;
+  let source = 'ad-one';
+  let duration = 10;
+  let currentTime = 0;
+  let seeks = 0;
+  let clicks = 0;
+  let plays = 0;
+  const video = {
+    get duration() { return duration; },
+    get currentSrc() { return source; },
+    get currentTime() { return currentTime; },
+    set currentTime(value) { currentTime = value; seeks++; },
+    muted: false, playbackRate: 1, isConnected: true,
+    play() { plays++; }
+  };
   const style = { id: '', textContent: '', remove() { removed = true; } };
   const document = {
     head: { appendChild() {} },
     documentElement: { appendChild() {} },
     createElement() { return style; },
-    querySelectorAll() { return [{ click() {} }]; },
+    querySelectorAll() { return [{ click() { clicks++; } }]; },
     querySelector(selector) {
       if (selector !== '#movie_player') return null;
-      return { classList: { contains(value) { return value === 'ad-showing'; } }, querySelector() { return video; } };
+      return { classList: { contains(value) { return showing && value === 'ad-showing'; } }, querySelector() { return video; } };
     }
   };
   const context = { window: {}, location: { hostname: 'www.youtube.com' }, document, setInterval(fn) { tick = fn; return 7; }, clearInterval() {} };
   assert.equal(vm.runInNewContext(injection(true), context), true);
-  tick();
-  assert.equal(video.currentTime, 9.95);
+  tick(); tick();
+  assert.equal(seeks, 1);
+  assert.ok(Math.abs(currentTime - 9.99) < 0.001);
   assert.equal(video.muted, true);
-  assert.equal(vm.runInNewContext(injection(false), context), false);
+  assert.equal(video.playbackRate, 16);
+  assert.equal(plays, 1);
+  assert.ok(clicks >= 3);
+
+  source = 'ad-two'; duration = 5; tick();
+  assert.equal(seeks, 2);
+  assert.ok(Math.abs(currentTime - 4.99) < 0.001);
+
+  showing = false; tick();
   assert.equal(video.muted, false);
+  assert.equal(video.playbackRate, 1);
+  assert.equal(vm.runInNewContext(injection(false), context), false);
   assert.equal(removed, true);
 });

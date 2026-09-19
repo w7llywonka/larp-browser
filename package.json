@@ -1,7 +1,7 @@
 {
   "name": "powershell-browser",
   "productName": "PowerShell Browser",
-  "version": "0.5.1",
+  "version": "0.5.2",
   "description": "A standalone browser inside a faithful classic PowerShell console interface.",
   "main": "main.js",
   "private": true,

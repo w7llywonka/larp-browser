@@ -42,12 +42,13 @@ function injection(enabled) {
       'yt-mealbar-promo-renderer', 'ytd-banner-promo-renderer'
     ].join(',') + '{display:none!important}';
     (document.head || document.documentElement).appendChild(style);
-    const state = { style, timer: 0, video: null, muted: false, rate: 1 };
+    const state = { style, timer: 0, video: null, muted: false, rate: 1, adKey: '', seeked: false };
     const restore = () => {
-      if (!state.video || !state.video.isConnected) { state.video = null; return; }
-      if (!state.muted) state.video.muted = false;
-      if (state.video.playbackRate > 2) state.video.playbackRate = state.rate;
-      state.video = null;
+      if (state.video && state.video.isConnected) {
+        if (!state.muted) state.video.muted = false;
+        if (state.video.playbackRate > 2) state.video.playbackRate = state.rate;
+      }
+      state.video = null; state.adKey = ''; state.seeked = false;
     };
     const tick = () => {
       document.querySelectorAll('.ytp-ad-skip-button,.ytp-skip-ad-button,.ytp-ad-skip-button-modern,.ytp-ad-skip-button-slot button,.ytp-ad-overlay-close-button').forEach(button => button.click());
@@ -56,9 +57,17 @@ function injection(enabled) {
       const showing = !!player && (player.classList.contains('ad-showing') || player.classList.contains('ad-interrupting'));
       if (!showing || !video) { restore(); return; }
       if (state.video !== video) { restore(); state.video = video; state.muted = video.muted; state.rate = video.playbackRate; }
+      const adKey = (video.currentSrc || video.src || '') + '|' + video.duration;
+      if (state.adKey !== adKey) { state.adKey = adKey; state.seeked = false; }
       video.muted = true;
-      if (Number.isFinite(video.duration) && video.duration > 0) video.currentTime = Math.max(0, video.duration - .05);
-      else video.playbackRate = 16;
+      video.playbackRate = 16;
+      if (!state.seeked && Number.isFinite(video.duration) && video.duration > 0) {
+        state.seeked = true;
+        // Seek only once per ad. Repeatedly pinning the playhead near the end
+        // prevents YouTube from receiving the media ended transition.
+        try { video.currentTime = Math.max(0, video.duration - .01); } catch {}
+        Promise.resolve(video.play?.()).catch(() => {});
+      }
     };
     state.timer = setInterval(tick, 250);
     state.stop = () => { clearInterval(state.timer); restore(); state.style.remove(); };
