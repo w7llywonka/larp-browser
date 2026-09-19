@@ -4,9 +4,9 @@ A standalone Windows browser that copies classic Windows PowerShell: native Wind
 
 ## Download and first launch
 
-Download **Larp-Browser-Setup-0.4.0.exe** from [Releases](https://github.com/w7llywonka/larp-browser/releases). Run the setup EXE to install the browser and its built-in automatic update checker. No Node.js installation is needed. A portable ZIP is also available, but it does not install updates automatically. Close older portable versions before installing; your existing local profile is preserved.
+Download **Larp-Browser-Setup-0.5.0.exe** from [Releases](https://github.com/w7llywonka/larp-browser/releases). Run the setup EXE to install the browser and its built-in automatic update checker. No Node.js installation is needed. A portable ZIP is also available, but it does not install updates automatically. Close older portable versions before installing; your existing local profile is preserved.
 
-First launch plays a short console boot animation, then opens configuration with a live preview. Choose Strict, Balanced, or Browser realism, then customize separate windows, titles, startup text, live output, download alerts, blinking, font size, disguise shortcut, and search engine. Type `setup` to revisit the preview or `settings` for a numbered console menu.
+First launch plays a short console boot animation, then opens configuration with a live preview. Choose Strict, Balanced, or Browser realism, then customize separate windows, titles, startup text, live output, download alerts, blinking, font size, disguise shortcut, search engine, automatic updates, and YouTube ad blocking. Type `setup` to revisit the preview or `settings` for a numbered console menu.
 
 ![First launch configuration](screenshots/setup.png)
 
@@ -55,6 +55,7 @@ search mechanical keyboards
 | `settings banner off`, `settings blink off`, `font 18` | Console appearance |
 | `settings panic f12` | Choose f8, f12, or ctrlshiftspace |
 | `settings search google` | Choose duckduckgo, google, or bing |
+| `adblock on/off/status` | Control the built-in YouTube ad blocker |
 | `bookmark [name]`, `bookmarks` | Save or list bookmarks |
 | `bookmark open 1`, `bookmark remove 1` | Open or remove a bookmark |
 | `history [words]`, `history clear` | Search or clear history |
@@ -66,6 +67,8 @@ search mechanical keyboards
 | `zoom 150`, `mute` | Page zoom or audio |
 | `save`, `print`, `status`, `site` | Save HTML, print, page state, connection |
 | `home`, `cls`, `about`, `exit` | Prompt, clear output, version, close window |
+
+The YouTube blocker is enabled by default and combines request filtering with in-page ad skipping. Use `adblock off` or `settings youtubeads off` to disable it immediately. It is limited to YouTube and does not alter requests from unrelated sites.
 
 Split browsing needs `settings windows off`. Workspaces are available in regular windows. Numbered settings accept a number to cycle or a number and value (`10 on` enables the command window); `done` leaves the menu.
 
@@ -100,9 +103,9 @@ Regular cookies, history, preferences, tab URLs, workspaces, bookmarks, download
 
 Remote pages are sandboxed without Node.js or the local command bridge. Permissions use native dialogs; certificate failures are not bypassed. Disguise hides the interface; it does not delete history or saved files.
 
-Version **0.4.0** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
+Version **0.5.0** is an independent Electron/Chromium browser prototype. Chrome extensions, account sync, password management, default-browser registration, DRM support are not included. The native frame follows Windows version/display settings. The startup copyright line reproduces original PowerShell text; this project is not affiliated with Microsoft. Electron/Chromium notices accompany the release.
 
-Validated locally with **15 unit tests, 93 browser integration checks, and 4 actual NSIS update-feed checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
+Validated locally with **18 unit tests, 95 browser integration checks, and 4 actual NSIS update-feed checks**, and packaged startup/close checks. These cover navigation, popup POST bodies, downloads, private isolation, onboarding, split bounds, snapshots, notes, workspaces, live output, native window migration, persistent console control, disguise, and destruction. Public HTTPS verification is supplementary; local fixtures drive required checks.
 
 
 ## Automatic updates

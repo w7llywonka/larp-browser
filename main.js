@@ -5,6 +5,7 @@ const path = require('node:path');
 const os = require('node:os');
 const { destination, splitCommand, unquote, safeWebURL, tabIndex, ENGINES } = require('./core');
 const { preferences } = require('./preferences');
+const { configureYouTubeAdBlocking, syncYouTubeAdBlocking } = require('./youtube-adblock');
 
 const testing = !app.isPackaged && process.argv.includes('--self-test');
 const smokeTesting = process.argv.includes('--smoke-test');
@@ -67,6 +68,8 @@ const HELP = `Browser commands (these are browser commands, not actual PowerShel
   update download        Download an available update manually
   update install         Apply a downloaded update and restart
   settings updates off   Disable automatic downloads and installation
+  adblock on / off        Control YouTube ad blocking
+  settings youtubeads off Disable YouTube ad blocking
   settings search <name> Choose duckduckgo, google, or bing
   save                   Save the current page as HTML
   print                  Print the current page
@@ -128,6 +131,7 @@ function controllerFor(wc) {
 function configureSession(ses) {
   if (sessions.has(ses)) return;
   sessions.add(ses);
+  configureYouTubeAdBlocking(ses, () => store?.preferences?.youtubeAds !== false);
   const grants = new Set();
   ses.setPermissionCheckHandler((_wc, permission, origin) => ['fullscreen', 'sanitized-clipboard-write'].includes(permission) || grants.has(origin + ':' + permission));
   ses.setPermissionRequestHandler(async (wc, permission, callback, details) => {
@@ -328,6 +332,7 @@ class BrowserController {
       this.output('Unable to open ' + target + '\n' + reason + ' (' + code + ')\nUse reload to retry this exact address, or back to return to the previous page.', 'error');
       this.notify();
     });
+    listen('dom-ready', () => { syncYouTubeAdBlocking(wc, store.preferences.youtubeAds); });
     listen('did-finish-load', () => { this.recordEvent('ready', tab.title || tab.url); if (tab === this.current() && !this.consoleVisible) this.showPage(); });
     listen('before-input-event', (event, input) => this.shortcut(event, input));
     listen('context-menu', (_event, p) => this.contextMenu(tab, p));
@@ -602,7 +607,9 @@ class BrowserController {
   }
 }
 
-require('./features')(BrowserController, { app, controllers, getStore: () => store, saveStore, writeStore, testing, getUpdates: () => updates });
+require('./features')(BrowserController, { app, controllers, getStore: () => store, saveStore, writeStore, testing, getUpdates: () => updates, syncYouTubeAds: enabled => {
+  for (const c of controllers.values()) for (const tab of c.tabs) syncYouTubeAdBlocking(tab.view.webContents, enabled);
+} });
 
 function fromIPC(event) {
   const controller = controllerFor(event.sender);

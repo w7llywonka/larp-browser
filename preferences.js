@@ -1,5 +1,5 @@
 'use strict';
-const DEFAULTS = Object.freeze({ realism: 'balanced', consoleWindow: true, windows: false, title: 'classic', banner: true, watch: false, notifications: true, blink: true, fontSize: 16, panic: 'f8', search: 'duckduckgo', updates: true });
+const DEFAULTS = Object.freeze({ realism: 'balanced', consoleWindow: true, windows: false, title: 'classic', banner: true, watch: false, notifications: true, blink: true, fontSize: 16, panic: 'f8', search: 'duckduckgo', updates: true, youtubeAds: true });
 const PRESETS = {
   strict: { realism: 'strict', title: 'classic', banner: true, watch: false, notifications: false, blink: true },
   balanced: { realism: 'balanced', title: 'classic', banner: true, watch: false, notifications: true, blink: true },
@@ -7,7 +7,7 @@ const PRESETS = {
 };
 function preferences(value = {}) {
   const result = { ...DEFAULTS };
-  for (const key of ['consoleWindow', 'windows', 'banner', 'watch', 'notifications', 'blink', 'updates']) if (typeof value[key] === 'boolean') result[key] = value[key];
+  for (const key of ['consoleWindow', 'windows', 'banner', 'watch', 'notifications', 'blink', 'updates', 'youtubeAds']) if (typeof value[key] === 'boolean') result[key] = value[key];
   if (['strict', 'balanced', 'browser', 'custom'].includes(value.realism)) result.realism = value.realism;
   if (['classic', 'page'].includes(value.title)) result.title = value.title;
   if (['f8', 'f12', 'ctrlshiftspace'].includes(value.panic)) result.panic = value.panic;

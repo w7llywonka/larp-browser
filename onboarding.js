@@ -16,7 +16,7 @@ window.setupUI = (() => {
     browser: { title: 'page', watch: true, notifications: true, banner: true, blink: true }
   };
   function fill(s) {
-    for (const key of ['consoleWindow', 'windows', 'banner', 'watch', 'notifications', 'blink', 'updates']) $('pref-' + key).checked = s[key];
+    for (const key of ['consoleWindow', 'windows', 'banner', 'watch', 'notifications', 'blink', 'updates', 'youtubeAds']) $('pref-' + key).checked = s[key];
     $('pref-title').checked = s.title === 'page';
     $('pref-font').value = s.fontSize;
     $('pref-search').value = s.search;
@@ -29,7 +29,7 @@ window.setupUI = (() => {
       realism: custom ? 'custom' : form.querySelector('[name=realism]:checked')?.value || 'custom',
       consoleWindow: $('pref-consoleWindow').checked, windows: $('pref-windows').checked, title: $('pref-title').checked ? 'page' : 'classic',
       banner: $('pref-banner').checked, watch: $('pref-watch').checked, notifications: $('pref-notifications').checked,
-      blink: $('pref-blink').checked, fontSize: Number($('pref-font').value), panic: $('pref-panic').value, search: $('pref-search').value, updates: $('pref-updates').checked
+      blink: $('pref-blink').checked, fontSize: Number($('pref-font').value), panic: $('pref-panic').value, search: $('pref-search').value, updates: $('pref-updates').checked, youtubeAds: $('pref-youtubeAds').checked
     };
   }
   function renderPreview() {

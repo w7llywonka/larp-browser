@@ -6,7 +6,7 @@ const { destination, splitCommand, unquote, safeWebURL, tabIndex } = require('./
 const { preferences, PRESETS, workspaceName } = require('./preferences');
 
 module.exports = (Controller, env) => {
-  const { app, controllers, getStore, saveStore, testing, getUpdates } = env;
+  const { app, controllers, getStore, saveStore, testing, getUpdates, syncYouTubeAds } = env;
   const p = Controller.prototype;
   const original = { state: p.state, current: p.current, navigate: p.navigate, closeTab: p.closeTab, output: p.output, execute: p.execute, shortcut: p.shortcut, addTab: p.addTab, switchTab: p.switchTab };
   const prefs = () => getStore().preferences;
@@ -138,6 +138,7 @@ module.exports = (Controller, env) => {
     const wasConsole = prefs().consoleWindow;
     store.preferences = preferences(value);
     getUpdates()?.sync();
+    syncYouTubeAds(prefs().youtubeAds);
     store.fontSize = prefs().fontSize; store.search = prefs().search;
     if (complete) store.setupComplete = true;
     if (wasConsole !== prefs().consoleWindow) this.applyConsoleMode(prefs().consoleWindow);
@@ -251,7 +252,7 @@ module.exports = (Controller, env) => {
   };
   p.settingsText = function () {
     const s = prefs();
-    return `Browser configuration\n\n  [1] Realism         ${s.realism} (strict / balanced / browser)\n  [2] Separate windows ${s.windows ? 'on' : 'off'}\n  [3] Window title    ${s.title} (classic / page)\n  [4] Startup banner  ${s.banner ? 'on' : 'off'}\n  [5] Live console    ${s.watch ? 'on' : 'off'}\n  [6] Download alerts ${s.notifications ? 'on' : 'off'}\n  [7] Cursor blinking ${s.blink ? 'on' : 'off'}\n  [8] Console font    ${s.fontSize} px\n  [9] Disguise key    ${s.panic} (f8 / f12 / ctrlshiftspace)\n  [10] Command window ${s.consoleWindow ? 'on' : 'off'}\n  [11] Auto updates    ${s.updates ? 'on' : 'off'}\n\nEnter a number to cycle, or a number and value, e.g. 2 on.\nUse settings console on, settings windows on, settings realism strict, or settings search google.\nUse setup to reopen the visual preview. Type done to leave this menu.\nSeparate windows gives each tab its own native PowerShell window.\nChoose windows off for split browsing.`;
+    return `Browser configuration\n\n  [1] Realism         ${s.realism} (strict / balanced / browser)\n  [2] Separate windows ${s.windows ? 'on' : 'off'}\n  [3] Window title    ${s.title} (classic / page)\n  [4] Startup banner  ${s.banner ? 'on' : 'off'}\n  [5] Live console    ${s.watch ? 'on' : 'off'}\n  [6] Download alerts ${s.notifications ? 'on' : 'off'}\n  [7] Cursor blinking ${s.blink ? 'on' : 'off'}\n  [8] Console font    ${s.fontSize} px\n  [9] Disguise key    ${s.panic} (f8 / f12 / ctrlshiftspace)\n  [10] Command window ${s.consoleWindow ? 'on' : 'off'}\n  [11] Auto updates    ${s.updates ? 'on' : 'off'}\n  [12] YouTube ad block ${s.youtubeAds ? 'on' : 'off'}\n\nEnter a number to cycle, or a number and value, e.g. 2 on.\nUse settings console on, settings windows on, settings realism strict, or settings search google.\nUse setup to reopen the visual preview. Type done to leave this menu.\nSeparate windows gives each tab its own native PowerShell window.\nChoose windows off for split browsing.`;
   };
   p.changeSetting = function (key, value) {
     const s = { ...prefs() };
@@ -259,7 +260,7 @@ module.exports = (Controller, env) => {
       if (!PRESETS[value]) throw new Error('Choose strict, balanced, or browser.');
       Object.assign(s, PRESETS[value]);
     } else {
-      if (['consoleWindow', 'windows', 'banner', 'watch', 'notifications', 'blink', 'updates'].includes(key)) {
+      if (['consoleWindow', 'windows', 'banner', 'watch', 'notifications', 'blink', 'updates', 'youtubeAds'].includes(key)) {
         if (!['on', 'off'].includes(value)) throw new Error('Use ' + key + ' on or off.');
         s[key] = value === 'on';
       } else if (key === 'font') {
@@ -291,6 +292,12 @@ module.exports = (Controller, env) => {
     let arg = unquote(argument);
     if (this.disguised && raw) { this.disguised = false; this.updateTitle(); this.notify(); }
     try {
+      if (name === 'adblock') {
+        if (!arg || arg === 'status') this.output('YouTube ad blocking: ' + (prefs().youtubeAds ? 'on' : 'off'));
+        else if (['on', 'off'].includes(arg.toLowerCase())) this.changeSetting('youtubeAds', arg.toLowerCase());
+        else throw new Error('Use adblock on, adblock off, or adblock status.');
+        return;
+      }
       if (name === 'update' || name === 'updates') {
         const service = getUpdates();
         if (arg === 'install') { writeStore(); service.install(); }
@@ -301,8 +308,8 @@ module.exports = (Controller, env) => {
         return;
       }
       if (this.settingsMenu && /^\d+$/.test(name)) {
-        const keys = ['realism', 'windows', 'title', 'banner', 'watch', 'notifications', 'blink', 'font', 'panic', 'consoleWindow', 'updates'];
-        const key = keys[Number(name) - 1]; if (!key) throw new Error('Choose a setting from 1 through 11.');
+        const keys = ['realism', 'windows', 'title', 'banner', 'watch', 'notifications', 'blink', 'font', 'panic', 'consoleWindow', 'updates', 'youtubeAds'];
+        const key = keys[Number(name) - 1]; if (!key) throw new Error('Choose a setting from 1 through 12.');
         const s = prefs();
         if (!arg) {
           const values = key === 'realism' ? ['strict', 'balanced', 'browser'] : key === 'title' ? ['classic', 'page'] : key === 'panic' ? ['f8', 'f12', 'ctrlshiftspace'] : key === 'font' ? ['16', '18', '20'] : ['off', 'on'];

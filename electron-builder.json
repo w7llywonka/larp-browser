@@ -2,7 +2,7 @@
   "appId": "com.larp.browser",
   "productName": "PowerShell Browser",
   "directories": { "output": "release" },
-  "files": ["main.js", "core.js", "features.js", "preferences.js", "updater.js", "completion.js", "preload.js", "index.html", "console.css", "console.js", "onboarding.js", "assets/**", "LICENSE", "package.json"],
+  "files": ["main.js", "core.js", "features.js", "preferences.js", "updater.js", "youtube-adblock.js", "completion.js", "preload.js", "index.html", "console.css", "console.js", "onboarding.js", "assets/**", "LICENSE", "package.json"],
   "win": { "target": [{ "target": "nsis", "arch": ["x64"] }], "icon": "assets/powershell.ico", "artifactName": "Larp-Browser-Setup-${version}.${ext}" },
   "nsis": { "oneClick": true, "perMachine": false, "allowElevation": false, "createDesktopShortcut": true, "createStartMenuShortcut": true, "deleteAppDataOnUninstall": false, "runAfterFinish": true },
   "publish": [{ "provider": "github", "owner": "w7llywonka", "repo": "larp-browser", "releaseType": "release" }]
