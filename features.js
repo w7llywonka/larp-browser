@@ -6,7 +6,7 @@ const { destination, splitCommand, unquote, safeWebURL, tabIndex } = require('./
 const { preferences, PRESETS, workspaceName } = require('./preferences');
 
 module.exports = (Controller, env) => {
-  const { app, controllers, getStore, saveStore, testing, getUpdates, syncYouTubeAds } = env;
+  const { app, controllers, getStore, saveStore, writeStore, testing, getUpdates, syncYouTubeAds } = env;
   const p = Controller.prototype;
   const original = { state: p.state, current: p.current, navigate: p.navigate, closeTab: p.closeTab, output: p.output, execute: p.execute, shortcut: p.shortcut, addTab: p.addTab, switchTab: p.switchTab };
   const prefs = () => getStore().preferences;

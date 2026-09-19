@@ -90,6 +90,9 @@ module.exports = async ({ browser: b, privateWindow, shellWC: shell, root, store
   b.showPage();
   check(b.shellView.getVisible() && b.shellView.getBounds().height <= 180, 'single-window mode retains optional live console dock');
   await b.execute('watch off');
+  await b.execute('update install'); await wait(100);
+  const updateInstallOutput = await shell.executeJavaScript('document.querySelector("#transcript").textContent');
+  check(updateInstallOutput.includes('setup EXE') && !updateInstallOutput.includes('writeStore is not defined'), 'update install reaches the updater without an undefined writeStore reference');
   await b.execute('adblock status'); await wait(100);
   check((await shell.executeJavaScript('document.querySelector("#transcript").textContent')).includes('YouTube ad blocking: on'), 'adblock status reports the saved default');
   await b.execute('adblock off');
